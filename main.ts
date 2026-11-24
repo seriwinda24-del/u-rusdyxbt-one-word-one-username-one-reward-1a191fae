@@ -6,7 +6,7 @@
 // 1-30 character gate). The output directory is the harness's /output,
 // overridable for local runs through MAKEFUN_OUTPUT_DIR; the directory is
 // created when missing and never deleted.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const USERNAME = "seriwinda24-del";
@@ -20,4 +20,11 @@ if (USERNAME.length < 1 || USERNAME.length > 30 || USERNAME.trim().length === 0)
 
 const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outputDir, { recursive: true });
-writeFileSync(join(outputDir, "entry.txt"), USERNAME, "utf8");
+const entryPath = join(outputDir, "entry.txt");
+writeFileSync(entryPath, USERNAME, "utf8");
+
+// Read back what was written: a silent short write would hand the judge
+// an entry that is not the username, so refuse to exit quietly instead.
+if (readFileSync(entryPath, "utf8") !== USERNAME) {
+  throw new Error(`entry.txt does not contain ${JSON.stringify(USERNAME)}`);
+}
